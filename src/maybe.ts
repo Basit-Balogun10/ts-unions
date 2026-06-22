@@ -16,6 +16,10 @@ function just<T>(value: T): Maybe<T> {
   return { type: "Just", value };
 }
 
+function fromNullable<T>(value: T | null | undefined): Maybe<T> {
+  return value === null || value === undefined ? nothing() : just(value);
+}
+
 function isJust<T>(maybe: Maybe<T>) {
   return maybe.type === "Just";
 }
@@ -77,4 +81,4 @@ const andThen: CurriedAndThen = curry(function andThen<T, TResult>(
   return isJust(maybe) ? fn(maybe.value) : maybe;
 });
 
-export { andThen, isJust, isNothing, just, map, nothing, when, withDefault };
+export { andThen, fromNullable, isJust, isNothing, just, map, nothing, when, withDefault };

@@ -44,12 +44,16 @@ const chained: Maybe<number> = M.andThen((x) => M.just(x + 1), someValue);
 
 // Unwrapping values
 const value: number = M.withDefault(0, someValue); // Unwraps the value or returns 0 if nothing
+
+// Bridging plain JS values into Maybe
+const found: Maybe<number> = M.fromNullable([1, 2, 3].find((n) => n > 5)); // Nothing
 ```
 
 #### Maybe API
 
 - `M.just(value: T): Maybe<T>` - Creates a Maybe with a value
 - `M.nothing(): Maybe<T>` - Creates a Maybe without a value
+- `M.fromNullable(value: T | null | undefined): Maybe<T>` - Lifts a nullable JS value into a Maybe
 - `M.when(pattern: Pattern , maybe: Maybe<T>): R` - Pattern matching
 - `M.map(fn: (value: T) => R, maybe: Maybe<T>): Maybe<R>` - Transform the value if it exists
 - `M.andThen(fn: (value: T) => Maybe<R>, maybe: Maybe<T>): Maybe<R>` - Chain Maybe operations
@@ -91,6 +95,16 @@ const chained = RD.andThen((value) => RD.success(value + "!!!"), successData);
 
 // Unwrapping values
 const unwrapped = RD.withDefault("No data", successData); // Unwraps the value or returns "No data" if not success
+
+// Bridging Promises into RemoteData
+async function loadUser(id: number, setState: (data: RemoteData<string>) => void) {
+  // fromPromise can only resolve to Success or Error — the promise is already
+  // in flight by the time it receives it, so set Loading yourself just before:
+  setState(RD.loading());
+  setState(await RD.fromPromise(fetchUser(id)));
+}
+
+declare function fetchUser(id: number): Promise<string>;
 ```
 
 #### RemoteData API
@@ -99,6 +113,7 @@ const unwrapped = RD.withDefault("No data", successData); // Unwraps the value o
 - `RD.loading(): RemoteData<T>` - Loading state
 - `RD.success(value: T): RemoteData<T>` - Success state with value
 - `RD.error(error: Error): RemoteData<T>` - Error state with error
+- `RD.fromPromise(promise: Promise<T>): Promise<RemoteData<T>>` - Resolves to Success or Error based on the promise's outcome
 - `RD.when(pattern: Pattern, data: RemoteData<T>): R` - Pattern matching
 - `RD.map(fn: (value: T) => R, data: RemoteData<T>): RemoteData<R>` - Transform success value
 - `RD.andThen(fn: (value: T) => RemoteData<R>, data: RemoteData<T>): RemoteData<R>` - Chain RemoteData operations

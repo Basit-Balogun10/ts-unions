@@ -32,6 +32,24 @@ describe("RemoteData", () => {
     });
   });
 
+  describe("fromPromise", () => {
+    it("should return Success when the promise resolves", async () => {
+      const result = await RD.fromPromise(Promise.resolve(42));
+      expect(result).toEqual({ type: "Success", value: 42 });
+    });
+
+    it("should return Error when the promise rejects", async () => {
+      const err = new Error("network down");
+      const result = await RD.fromPromise(Promise.reject(err));
+      expect(result).toEqual({ type: "Error", error: err });
+    });
+
+    it("should wrap a non-Error rejection as-is", async () => {
+      const result = await RD.fromPromise(Promise.reject("plain string failure"));
+      expect(result).toEqual({ type: "Error", error: "plain string failure" });
+    });
+  });
+
   describe("when", () => {
     it("should handle NotAsked case", () => {
       const value = RD.notAsked<number>();

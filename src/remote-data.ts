@@ -30,6 +30,17 @@ function error<TSuccess, TError = Error>(error: TError): RemoteData<TSuccess, TE
   return { type: "Error", error };
 }
 
+async function fromPromise<TSuccess, TError = Error>(
+  promise: Promise<TSuccess>,
+): Promise<RemoteData<TSuccess, TError>> {
+  try {
+    const value = await promise;
+    return success<TSuccess, TError>(value);
+  } catch (err) {
+    return error<TSuccess, TError>(err as TError);
+  }
+}
+
 function isSuccess<TSuccess, TError = Error>(remoteData: RemoteData<TSuccess, TError>) {
   return remoteData.type === "Success";
 }
@@ -131,6 +142,7 @@ const andThen: CurriedAndThen = curry(function andThen<TSuccess, TError, TResult
 export {
   andThen,
   error,
+  fromPromise,
   isError,
   isLoading,
   isNotAsked,

@@ -19,6 +19,29 @@ describe("Maybe", () => {
     });
   });
 
+  describe("fromNullable", () => {
+    it("should return Just when value is present", () => {
+      const result = M.fromNullable(42);
+      expect(result).toEqual({ type: "Just", value: 42 });
+    });
+
+    it("should return Nothing when value is null", () => {
+      const result = M.fromNullable<number>(null);
+      expect(result).toEqual({ type: "Nothing" });
+    });
+
+    it("should return Nothing when value is undefined", () => {
+      const result = M.fromNullable<number>(undefined);
+      expect(result).toEqual({ type: "Nothing" });
+    });
+
+    it("should treat falsy-but-present values as Just", () => {
+      expect(M.fromNullable(0)).toEqual({ type: "Just", value: 0 });
+      expect(M.fromNullable("")).toEqual({ type: "Just", value: "" });
+      expect(M.fromNullable(false)).toEqual({ type: "Just", value: false });
+    });
+  });
+
   describe("when", () => {
     it("should handle Just case", () => {
       const value = M.just(42);
